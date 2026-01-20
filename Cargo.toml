@@ -1,0 +1,10 @@
+[package]
+name = "rico"
+description = "Rico is an algorithm that recommends media based on the given parameters."
+version = "0.1.0"
+edition = "2024"
+authors = ["Shemmy n3shemmy3.dev"]
+
+[dependencies]
+axum = { version = "0.8.8" }
+tokio = { version = "1", features = ["full"] }
