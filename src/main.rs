@@ -1,12 +1,29 @@
-use axum::{Router, routing::get};
+use axum::Router;
+use axum_folder_router::folder_router;
+use log::info;
+
+#[derive(Clone)]
+struct AppState;
+
+// Imports route.rs files & generates an ::into_router() fn
+#[folder_router("src/api/", AppState)]
+struct AppRouter();
 
 #[tokio::main]
-async fn main() {
-    // build our application with a single route
-    let app = Router::new().route("/", get(|| async { "Hello World, I am Rico!" }));
+async fn main() -> anyhow::Result<()> {
+    // Create app state
+    let app_state = AppState;
 
-    // run our app with hyper, listening globally on port 3000
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    // Use the init fn generated above
+    let app_router: Router<AppState> = AppRouter::into_router();
 
-    axum::serve(listener, app).await.unwrap();
+    // Build the router and provide the state
+    let app: Router<()> = app_router.with_state(app_state);
+
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
+
+    let local_address = listener.local_addr()?;
+    info!("listening on : {local_address}");
+    axum::serve(listener, app).await?;
+    Ok(())
 }
